@@ -16,11 +16,15 @@ Each round is built from LUT polynomials (for S-Box/XOR/GF multipliers) plus car
 
 ### Highligts
 
-- **Zeta16 nibble domain**: Split each byte into (hi, lo) 4-bit nibbles, each encoded on the 16-point codebook (Zeta16 powers).(Conjugate 추가하기 !!!!!). Pack 16 bytes per state with stride slots / 16.
+- **Zeta16 nibble domain**: Split each byte into (hi, lo) 4-bit nibbles, each encoded on the 16-point codebook (Zeta16 powers). 
+
+  Power basis with conjugates, When evaluating bivariate LUT polynomials, we build a degree-15 basis using true powers for 1..8 and **conjugate mirroring** for 9..15.
+    Pack 16 bytes per state with stride slots / 16.
 - **XOR via sparse bivariate LUT**: 4-bit XOR polynomial with many zero coefficients -> fast AddRoundKey.
 - **S-Box via two 1D LUTs**: Hi/lo polynomials share the same power basis to save work.
 - **ShiftRows** via masked per-row rotations under column-first packing.
-- **MixColumns (forward)** as GF(2)*state xor GF(3)*rot1 xor rot2 xor rot3, where rotk is column up-shift by k implemented as a single packed rotate. (diagonal 텀에 대해 행렬곱을 했을시 이 믹스컬럼결과가 똑같이 나온다는것에 대한 것에서 아이디어를 얻음)
+- **MixColumns (forward)** as GF(2)*state xor GF(3)*rot1 xor rot2 xor rot3, where rotk is column up-shift by k implemented as a single packed rotate. 
+  - The idea came from the observation that the result of the matrix multiplication is identical to the accumulated sum obtained by multiplying the matrix’s diagonal terms with appropriately rotated ciphertexts
 - **InvMixColumns** via bivariate LUTs for GF(2^8) multipliers x (9, 11, 13, 14), then XOR accumulation.
 
 ---
